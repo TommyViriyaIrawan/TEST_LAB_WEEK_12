@@ -9,15 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.test_lab_week_12.model.Movie
 
-
 class MovieAdapter(private val clickListener: MovieClickListener) :
     RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
 
     private val movies = mutableListOf<Movie>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.view_movie_item, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.view_movie_item, parent, false)
         return MovieViewHolder(view)
     }
 
@@ -29,22 +28,19 @@ class MovieAdapter(private val clickListener: MovieClickListener) :
         holder.itemView.setOnClickListener { clickListener.onMovieClick(movie) }
     }
 
-    fun addMovies(movieList: List<Movie>) {
+    fun setMovies(movieList: List<Movie>) {
+        movies.clear()
         movies.addAll(movieList)
-        notifyItemRangeInserted(0, movieList.size)
+        notifyDataSetChanged()
     }
 
     class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imageUrl = "https://image.tmdb.org/t/p/w185/"
-        private val titleText: TextView by lazy {
-            itemView.findViewById(R.id.movie_title)
-        }
-        private val poster: ImageView by lazy {
-            itemView.findViewById(R.id.movie_poster)
-        }
+        private val titleText: TextView by lazy { itemView.findViewById(R.id.movie_title) }
+        private val poster: ImageView by lazy { itemView.findViewById(R.id.movie_poster) }
 
         fun bind(movie: Movie) {
-            titleText.text = movie.title
+            titleText.text = movie.title ?: "-"
 
             Glide.with(itemView.context)
                 .load("$imageUrl${movie.posterPath}")

@@ -9,26 +9,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class MovieViewModel(private val movieRepository: MovieRepository) : ViewModel() {
+class DetailsViewModel(private val repository: MovieRepository) : ViewModel() {
 
-    private val _popularMovies = MutableStateFlow(emptyList<Movie>())
-    val popularMovies: StateFlow<List<Movie>> = _popularMovies
+    private val _movieDetails = MutableStateFlow<Movie?>(null)
+    val movieDetails: StateFlow<Movie?> = _movieDetails
 
     private val _error = MutableStateFlow("")
     val error: StateFlow<String> = _error
 
-    init {
-        fetchPopularMovies()
-    }
-
-    private fun fetchPopularMovies() {
+    fun loadDetails(movieId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            movieRepository.fetchMovies()
+            repository.fetchMovieDetails(movieId)
                 .catch { _error.value = "Error: ${it.message}" }
-                .collect { movies ->
-                    _popularMovies.value = movies
-                        .filter { movie -> movie.releaseDate?.isNotEmpty() == true }
-                        .sortedByDescending { movie -> movie.popularity }
+                .collect { movie ->
+                    _movieDetails.value = movie
                 }
         }
     }

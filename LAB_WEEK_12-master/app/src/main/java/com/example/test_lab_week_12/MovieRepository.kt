@@ -8,11 +8,18 @@ import kotlinx.coroutines.flow.flowOn
 
 class MovieRepository(private val movieService: MovieService) {
 
-    private val apiKey = "4f3099dea795f1050f22e95e26c29e4e" // Ganti APIKEY kamu
+    private val apiKey = "4f3099dea795f1050f22e95e26c29e4e" // kamu sudah isi 👍
 
     fun fetchMovies(): Flow<List<Movie>> {
         return flow {
             emit(movieService.getPopularMovies(apiKey).results)
         }.flowOn(Dispatchers.IO)
     }
+
+    fun fetchMovieDetails(movieId: Int): Flow<Movie> {
+        return flow {
+            emit(movieService.getMovieDetails(movieId, apiKey))
+        }.flowOn(Dispatchers.IO)
+    }
+
 }

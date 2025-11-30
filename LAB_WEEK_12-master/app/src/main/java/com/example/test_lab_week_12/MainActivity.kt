@@ -10,6 +10,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.example.test_lab_week_12.model.Movie
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 
@@ -21,11 +22,10 @@ class MainActivity : ComponentActivity(), MovieAdapter.MovieClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val recyclerView: RecyclerView = findViewById(R.id.movie_list)
+        val recyclerView = findViewById<RecyclerView>(R.id.movie_list)
         recyclerView.adapter = movieAdapter
 
-        val movieRepository =
-            (application as MovieApplication).movieRepository
+        val movieRepository = (application as MovieApplication).movieRepository
 
         val movieViewModel = ViewModelProvider(
             this,
@@ -40,14 +40,14 @@ class MainActivity : ComponentActivity(), MovieAdapter.MovieClickListener {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 launch {
-                    movieViewModel.popularMovies.collect { movies ->
-                        movieAdapter.addMovies(movies)
+                    movieViewModel.popularMovies.collectLatest { movies ->
+                        movieAdapter.setMovies(movies)
                     }
                 }
 
                 launch {
-                    movieViewModel.error.collect { error ->
-                        if (error.isNotEmpty()) {
+                    movieViewModel.error.collectLatest { error ->
+                        if (error.isNotBlank()) {
                             Snackbar.make(recyclerView, error, Snackbar.LENGTH_LONG).show()
                         }
                     }
@@ -58,7 +58,8 @@ class MainActivity : ComponentActivity(), MovieAdapter.MovieClickListener {
 
     override fun onMovieClick(movie: Movie) {
         val intent = Intent(this, DetailsActivity::class.java)
-        intent.putExtra("movie_id", movie.id)
+        intent.putExtra(DetailsActivity.EXTRA_MOVIE_ID, movie.id)
         startActivity(intent)
     }
+
 }
